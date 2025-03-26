@@ -1,0 +1,24 @@
+{
+    "name": "universaldownloader",
+    "version": "1.0.0",
+    "description": "PWA per scaricare musica da Qobuz al Raspberry Pi",
+    "main": "server/index.js",
+    "scripts": {
+      "start": "node server/index.js",
+      "dev": "nodemon server/index.js"
+    },
+    "dependencies": {
+      "express": "^4.18.2",
+      "cors": "^2.8.5",
+      "body-parser": "^1.20.2",
+      "ws": "^8.14.2",
+      "node-ssh": "^13.1.0",
+      "dotenv": "^16.3.1",
+      "web-push": "^3.6.6"
+    },
+    "devDependencies": {
+      "nodemon": "^3.0.1"
+    },
+    "author": "Lorenzo",
+    "license": "MIT"
+  }

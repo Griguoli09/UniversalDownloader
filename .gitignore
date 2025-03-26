@@ -1,0 +1,26 @@
+# Configurazione e variabili d'ambiente
+.env
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Editor e IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# File temporanei
+.DS_Store
+Thumbs.db
+*~
+
+# Logs
+logs/
+*.log
+
+# Docker
+docker-compose.override.yml

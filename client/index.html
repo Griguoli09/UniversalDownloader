@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniversalDownloader</title>
+  <meta name="description" content="Scarica da Qobuz sul tuo Raspberry Pi">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="css/styles.css">
+  <meta name="theme-color" content="#000000">
+  
+  <!-- Icone PWA -->
+  <link rel="icon" href="images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="192x192" href="images/icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="images/icon-512x512.png">
+  <link rel="apple-touch-icon" href="images/icon-192x192.png">
+  
+  <!-- Prevenire la memorizzazione nella cache del browser -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <h1>Universal<span>Downloader</span></h1>
+    </header>
+    
+    <main>
+      <div class="download-form">
+        <div class="form-group">
+          <input type="text" id="qobuz-url" placeholder="Incolla il link Qobuz o YouTube qui...">
+          <button id="download-btn" onclick="console.log('Click rilevato!'); downloadFromUrl(); return false;">Download</button>
+        </div>
+        <div id="url-info" class="info-text"></div>
+      </div>
+      
+      <div class="status-container">
+        <h2>Stato Download</h2>
+        <div id="current-download" class="status-card hidden">
+          <div class="status-header">
+            <span id="status-label" class="status-label">In attesa...</span>
+            <span id="status-time" class="status-time"></span>
+          </div>
+          <div class="status-body">
+            <p id="status-url" class="status-url"></p>
+            <div id="status-progress" class="status-progress-bar">
+              <div id="progress-bar" class="progress"></div>
+            </div>
+            <div id="error-container" class="error-container hidden">
+              <h3>Dettagli errore:</h3>
+              <p id="error-message" class="error-message"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="history-container">
+        <h2>Cronologia Download</h2>
+        <div id="download-history" class="history-list">
+          <!-- Gli elementi della cronologia verranno aggiunti dinamicamente -->
+          <div class="empty-state">Nessun download recente</div>
+        </div>
+      </div>
+    </main>
+    
+    <footer>
+      <p>UniversalDownloader v1.0</p>
+    </footer>
+  </div>
+  
+  <script>
+    // Debug console per intercettare problemi prima di caricare app.js
+    console.log('HTML caricato, preparazione al caricamento degli script');
+    
+    // Funzione globale di supporto per il debug
+    window.debugLog = function(msg) {
+      console.log(msg);
+    };
+    
+    // Intercetta gli errori globali
+    window.onerror = function(message, source, lineno, colno, error) {
+      console.error('Errore JavaScript:', message, 'in', source, 'linea', lineno);
+      return false;
+    };
+  </script>
+  
+  <script src="js/app.js"></script>
+  
+  <script>
+    // Registra il service worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js', { scope: '/' })
+          .then(reg => {
+            console.log('Service Worker registrato: ', reg.scope);
+            // Forza l'aggiornamento del Service Worker
+            reg.update();
+          })
+          .catch(err => console.log('Errore registrazione Service Worker: ', err));
+      });
+    }
+    
+    // Test della funzione download
+    console.log('download button =', document.getElementById('download-btn'));
+    console.log('downloadFromUrl exists =', typeof downloadFromUrl === 'function');
+  </script>
+</body>
+</html>

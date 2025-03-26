@@ -1,0 +1,45 @@
+{
+  "name": "UniversalDownloader",
+  "short_name": "UniDown",
+  "description": "Scarica musica da Qobuz sul tuo Raspberry Pi",
+  "start_url": "/?source=pwa",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "images/icon-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "images/icon-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "share_target": {
+    "action": "/",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "shortcuts": [
+    {
+      "name": "Nuovo Download",
+      "short_name": "Download",
+      "description": "Avvia un nuovo download",
+      "url": "/?source=shortcut",
+      "icons": [{ "src": "images/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ],
+  "prefer_related_applications": false,
+  "categories": ["music", "utilities"]
+}

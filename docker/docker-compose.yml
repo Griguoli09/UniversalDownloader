@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  universaldownloader:
+    container_name: universaldownloader
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - PI_HOST=192.168.1.178
+      - PI_USER=raspberry
+      - PI_PASSWORD=pluto2002
+      - DOWNLOAD_COMMAND=qobuz-dl dl
+      - DOWNLOAD_PATH=/DATA/Media/Music/Musica/qobuz-dl
+      - VAPID_PUBLIC_KEY=BBKZ24jpUH56ZQhf1DG4izp5QAWi846vxJZTKimntvY5lJzMgFASkglWZW32aamcpNGP5Qs7G1vhyc-a2Mq6UrE
+      - VAPID_PRIVATE_KEY=El1EfHw_RUvbtKuxqE33Uq3VExZ1OurBt-zgcp66vLE
+      - VAPID_CONTACT=mailto:marco.gr09@gmail.com
+    volumes:
+      - ../server:/app/server
+      - ../client:/app/client
+    restart: unless-stopped
+    networks:
+      - universal-network
+
+networks:
+  universal-network:
+    driver: bridge
