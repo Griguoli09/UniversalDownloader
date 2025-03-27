@@ -22,7 +22,11 @@ const loadConfig = () => {
         moveFiles: false // qobuz-dl salva direttamente nella giusta cartella
       },
       youtube: {
-        download: '/snap/bin/yt-dlp -f bestaudio --extract-audio --audio-format mp3 --audio-quality 0',
+        // Comando aggiornato con --embed-thumbnail e metadati per l'album
+        download: '/snap/bin/yt-dlp -f bestaudio --extract-audio --audio-format mp3 --audio-quality 0 --embed-thumbnail --add-metadata --ppa "ffmpeg:-metadata album=\'Scaricati da YouTube\'"',
+        // Directory temporanea con permessi di scrittura
+        tempPath: '/home/raspberry/youtube-downloads',
+        // Directory finale per i file
         path: '/DATA/Media/Music/Musica/yt-dlp',
         moveFiles: true // yt-dlp richiede di spostare i file dopo il download
       }

@@ -1,34 +1,49 @@
 const { executeDownload } = require('../services/downloadService');
 const { broadcastStatus } = require('../services/websocketService');
 const { sendNotification } = require('./notificationController');
+const { loadConfig } = require('../config');
 
 // Array per memorizzare lo storico dei download (in memoria)
 // In un'applicazione di produzione sarebbe preferibile usare un database
 const downloads = [];
 
 /**
- * Avvia un nuovo download da Qobuz
+ * Avvia un nuovo download da Qobuz o YouTube
  * @param {Express.Request} req - La richiesta HTTP
  * @param {Express.Response} res - La risposta HTTP
  */
 const startDownload = async (req, res) => {
   try {
-    const { url } = req.body;
+    const { url, serviceType } = req.body;
     
-    // Verifica che l'URL sia stato fornito
+    // Verifica che l'URL e il tipo di servizio siano stati forniti
     if (!url) {
       return res.status(400).json({ error: 'URL richiesto' });
     }
     
-    // Verifica che l'URL sembri essere di Qobuz
-    if (!url.includes('qobuz.com')) {
+    if (!serviceType) {
+      return res.status(400).json({ error: 'Tipo di servizio richiesto' });
+    }
+    
+    // Carica la configurazione per verificare che il servizio sia supportato
+    const config = loadConfig();
+    if (!config.commands[serviceType]) {
+      return res.status(400).json({ error: `Servizio "${serviceType}" non supportato` });
+    }
+    
+    // Valida URL in base al tipo di servizio
+    if (serviceType === 'qobuz' && !url.includes('qobuz.com')) {
       return res.status(400).json({ error: 'URL Qobuz non valido' });
+    } else if (serviceType === 'youtube' && 
+              !(url.includes('youtube.com/watch') || url.includes('youtu.be/'))) {
+      return res.status(400).json({ error: 'URL YouTube non valido' });
     }
     
     // Crea un record per il download
     const download = {
       id: Date.now().toString(), // ID unico basato sul timestamp
       url,
+      serviceType,
       status: 'pending', // pending, completed, failed
       startTime: new Date(),
       endTime: null,
@@ -44,7 +59,7 @@ const startDownload = async (req, res) => {
     // Esegui il download in modo asincrono
     try {
       // Esegui il comando di download
-      const result = await executeDownload(url, download.id);
+      const result = await executeDownload(url, download.id, serviceType);
       
       // Aggiorna lo stato del download
       download.status = 'completed';
@@ -56,10 +71,10 @@ const startDownload = async (req, res) => {
       // Invia notifica di completamento
       sendNotification('all', {
         title: 'Download Completato',
-        body: `Download da Qobuz completato con successo`,
+        body: `Download da ${serviceType === 'youtube' ? 'YouTube' : 'Qobuz'} completato con successo`,
         icon: '/images/icon-192x192.png',
         tag: download.id,
-        data: { url, downloadId: download.id, status: 'completed' }
+        data: { url, downloadId: download.id, status: 'completed', serviceType }
       });
     } catch (error) {
       // In caso di errore, aggiorna lo stato
@@ -71,6 +86,7 @@ const startDownload = async (req, res) => {
       console.error('Dettagli errore download:', {
         id: download.id,
         url: url,
+        serviceType: serviceType,
         error: error.message,
         stack: error.stack
       });
@@ -84,7 +100,7 @@ const startDownload = async (req, res) => {
         body: `Impossibile completare il download: ${error.message}`,
         icon: '/images/icon-192x192.png',
         tag: download.id,
-        data: { url, downloadId: download.id, status: 'failed' }
+        data: { url, downloadId: download.id, status: 'failed', serviceType }
       });
       
       console.error('Errore durante il download:', error);
