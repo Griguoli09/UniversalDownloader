@@ -190,7 +190,7 @@ const executeYouTubeDownload = async (url, ssh, serviceConfig) => {
     console.log(`Verifica directory finale: ${serviceConfig.path}`);
     await ssh.execCommand(`sudo mkdir -p "${serviceConfig.path}"`, { cwd: '/' });
     
-    // Comando di download
+    // Comando di download - ora senza l'opzione fissa dell'album
     const command = `${serviceConfig.download} "${url}" -o "%(title)s.%(ext)s"`;
     console.log(`Esecuzione download YouTube: ${command}`);
     
@@ -248,12 +248,33 @@ const executeYouTubeDownload = async (url, ssh, serviceConfig) => {
     
     console.log('Download YouTube completato con successo');
     
-    // Attendi 5 secondi prima di spostare il file (come richiesto)
-    console.log('Attesa di 5 secondi prima di spostare il file...');
+    // Attendi 5 secondi prima di elaborare il file (come richiesto)
+    console.log('Attesa di 5 secondi prima di elaborare il file...');
     await new Promise(resolve => setTimeout(resolve, 5000));
     
-    // Sposta il file nella destinazione finale
+    // Imposta l'album uguale al titolo del file per il file MP3
     if (downloadedFileName) {
+      console.log(`Aggiornamento metadati per "${downloadedFileName}"...`);
+      
+      // Estrai il titolo dal nome del file (rimuovi l'estensione .mp3)
+      const fileTitle = downloadedFileName.replace('.mp3', '');
+      
+      // Comando per impostare l'album uguale al titolo
+      const metadataCommand = `ffmpeg -i "${downloadedFileName}" -c copy -metadata album="${fileTitle}" "${downloadedFileName}.temp.mp3" && mv "${downloadedFileName}.temp.mp3" "${downloadedFileName}"`;
+      
+      console.log(`Esecuzione comando metadati: ${metadataCommand}`);
+      const metadataResult = await ssh.execCommand(metadataCommand, {
+        cwd: serviceConfig.tempPath
+      });
+      
+      if (metadataResult.stderr && metadataResult.stderr.includes('Error')) {
+        console.error(`Errore durante l'aggiornamento dei metadati: ${metadataResult.stderr}`);
+        console.log('Continuando comunque con lo spostamento del file...');
+      } else {
+        console.log(`Metadati album aggiornati con successo per: ${downloadedFileName}`);
+      }
+      
+      // Sposta il file nella destinazione finale
       console.log(`Spostamento di "${downloadedFileName}" nella directory finale...`);
       
       const moveCommand = `sudo cp "${serviceConfig.tempPath}/${downloadedFileName}" "${serviceConfig.path}/${downloadedFileName}" && sudo rm "${serviceConfig.tempPath}/${downloadedFileName}"`;
